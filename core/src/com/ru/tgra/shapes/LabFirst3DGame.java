@@ -143,11 +143,15 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			}*/
 			Gdx.app.exit();
 		}
-		leftAngle += -0.2f * Gdx.input.getDeltaX();
-		upAngle += -0.2f * Gdx.input.getDeltaY();
+		float changeX = -0.2f * Gdx.input.getDeltaX();
+		float changeY = -0.2f * Gdx.input.getDeltaY();
+		leftAngle += changeX;
+		if(upAngle + changeY <= 70 && upAngle + changeY >= -85){
+			upAngle += changeY;
+		}
 		
-		cam.rotateY(-0.2f * Gdx.input.getDeltaX());
-		cam.pitch(-0.2f * Gdx.input.getDeltaY());	
+		cam.rotateY(changeX);
+		cam.pitch(changeY);	
 		
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
 			Projectile projectile = new Projectile();
@@ -197,17 +201,19 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		
 			ModelMatrix.main.loadIdentityMatrix();
 			
-			/* DRAW GUN
+			
 			ModelMatrix.main.pushMatrix();
-			ModelMatrix.main.addTranslation(0, -0.3f, 0);
 			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
 			ModelMatrix.main.addRotationY(leftAngle);
 			ModelMatrix.main.addRotationX(upAngle);
-			ModelMatrix.main.addScale(0.05f, 0.05f, 1);
+			ModelMatrix.main.addTranslation(0, 0, -0.3f);
+			ModelMatrix.main.addScale(0.005f, 0.005f, 0.1f);
+			
+			
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			BoxGraphic.drawSolidCube();
+			SphereGraphic.drawOutlineSphere();
 			ModelMatrix.main.popMatrix();
-			*/
+			
 			
 			for(Projectile p : projectiles){
 				p.drawProjectile(shader);
@@ -216,7 +222,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			for(int i = 0; i < projectiles.size(); i++){
 				for(int j = 0; j < projectiles.size(); j++){
 					if(i!=j && !projectiles.get(i).getPigeon()){
-						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.5f){
+						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.3f){
 							projectiles.get(i).setHit(true);
 							projectiles.get(j).setHit(true);
 							System.out.println("HIT!");

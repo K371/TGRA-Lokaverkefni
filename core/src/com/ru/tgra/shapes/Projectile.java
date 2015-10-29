@@ -1,5 +1,7 @@
 package com.ru.tgra.shapes;
 
+import java.util.Random;
+
 import com.badlogic.gdx.math.Vector3;
 
 public class Projectile {
@@ -9,12 +11,14 @@ public class Projectile {
 	private boolean pigeon;
 	private Vector3 v;
 	private boolean hit;
+	private Random r;
 	
 	public void setHit(boolean hit){
 		this.hit = hit;
 	}
 	
 	public Projectile(){
+		r = new Random();
 		v = new Vector3();
 		hit = false;
 		pigeon = false;
@@ -138,9 +142,35 @@ public class Projectile {
 				SphereGraphic.drawSolidSphere();
 			}
 			else if(!pigeon){
-				move -=0.25f;
-				shader.setModelMatrix(ModelMatrix.main.getMatrix());
-				SphereGraphic.drawSolidSphere();
+				move -=0.45f;
+				boolean negative;
+				boolean negative2;
+				int sign = 1;
+				int sign2 = 1;
+				for(int i = 0; i < 8; i++){
+					ModelMatrix.main.pushMatrix();
+					negative = r.nextBoolean();
+					negative2 = r.nextBoolean();
+					if(negative){
+						sign = -1;
+					}
+					else{
+						sign = 1;
+					}
+					if(negative2){
+						sign2 = -1;
+					}
+					else{
+						sign2 = 1;
+					}
+					ModelMatrix.main.addTranslation(sign * r.nextFloat(), sign2 * r.nextFloat(), sign * r.nextFloat());
+					ModelMatrix.main.addScale(0.1f, 0.1f, 0.1f);
+					shader.setModelMatrix(ModelMatrix.main.getMatrix());
+					SphereGraphic.drawSolidSphere();
+					ModelMatrix.main.popMatrix();
+				}
+				
+				
 			}
 			
 			
