@@ -1,10 +1,13 @@
 package com.ru.tgra.shapes;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 
 public class LabFirst3DGame extends ApplicationAdapter {
 
@@ -19,6 +22,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	public static int colorLoc;
 	
 	private Camera cam;
+	private ArrayList<Projectile> projectiles;
 	//private Camera orthoCam;
 	
 	private float fov = 100.0f;
@@ -35,8 +39,9 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	@Override
 	public void create () 
 	{
-		leftAngle = 45;
-		upAngle = 90;
+		projectiles = new ArrayList<Projectile>();
+		leftAngle = -45;
+		upAngle = 0;
 		//win = true;
 		//volume = 1;
 		
@@ -128,6 +133,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			cam.pitch(-90.0f * deltaTime);
 		}
 		
+		
 		if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
 			Gdx.graphics.setDisplayMode(500, 500, false);
 			/*if(!win){
@@ -141,7 +147,27 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		upAngle += -0.2f * Gdx.input.getDeltaY();
 		
 		cam.rotateY(-0.2f * Gdx.input.getDeltaX());
-		cam.pitch(-0.2f * Gdx.input.getDeltaY());		
+		cam.pitch(-0.2f * Gdx.input.getDeltaY());	
+		
+		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+			Projectile projectile = new Projectile();
+			projectile.setX(cam.eye.x);
+			projectile.setY(cam.eye.y);
+			projectile.setZ(cam.eye.z);
+			projectile.setPitch(upAngle);
+			projectile.setRotation(leftAngle);
+			projectiles.add(projectile);
+		}
+		if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
+			Projectile projectile = new Projectile();
+			projectile.setX(0);
+			projectile.setY(0);
+			projectile.setZ(0);
+			projectile.setPitch(45);
+			projectile.setRotation(-45);
+			projectile.setPigeon(true);
+			projectiles.add(projectile);
+		}
 	}
 	
 	private void display()
@@ -171,6 +197,42 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		
 			ModelMatrix.main.loadIdentityMatrix();
 			
+			/* DRAW GUN
+			ModelMatrix.main.pushMatrix();
+			ModelMatrix.main.addTranslation(0, -0.3f, 0);
+			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
+			ModelMatrix.main.addRotationY(leftAngle);
+			ModelMatrix.main.addRotationX(upAngle);
+			ModelMatrix.main.addScale(0.05f, 0.05f, 1);
+			shader.setModelMatrix(ModelMatrix.main.getMatrix());
+			BoxGraphic.drawSolidCube();
+			ModelMatrix.main.popMatrix();
+			*/
+			
+			for(Projectile p : projectiles){
+				p.drawProjectile(shader);
+			}
+			
+			for(int i = 0; i < projectiles.size(); i++){
+				for(int j = 0; j < projectiles.size(); j++){
+					if(i!=j && !projectiles.get(i).getPigeon()){
+						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.5f){
+							projectiles.get(i).setHit(true);
+							projectiles.get(j).setHit(true);
+							System.out.println("HIT!");
+							break;
+						}
+					}
+				}
+			}
+		
+			
+			for(Projectile p : projectiles){
+				if(p.getAbsoluteY() <= 0 || p.getAbsoluteY() > 30 || p.getAbsoluteZ() < -30 || p.getAbsoluteZ() > 30 || p.getAbsoluteX() < -30 || p.getAbsoluteX() > 30){
+					projectiles.remove(p);
+					break;
+				}
+			}
 			float s = (float)Math.sin(angle * Math.PI / 180.0);
 			float c = (float)Math.cos(angle * Math.PI / 180.0);
 			
@@ -232,6 +294,8 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();
+			
+			
 
 			//drawExtraObjects();
 			
