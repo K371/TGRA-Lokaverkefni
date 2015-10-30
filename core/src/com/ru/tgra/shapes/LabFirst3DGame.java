@@ -29,7 +29,8 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	
 	private Maze maze;
 	
-	//private Sound sound;
+	private Sound sound;
+	private Sound clayBreak;
 	//private Sound winSong;
 	//private boolean win;
 	//private long winTrack;
@@ -54,7 +55,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		SincGraphic.create(shader.getVertexPointer());
 		CoordFrameGraphic.create(shader.getVertexPointer());
 
-		Gdx.gl.glClearColor(0.3f, 0.3f, 0.8f, 1.0f);
+		Gdx.gl.glClearColor(0.4f, 0.4f, 1.0f, 1.0f);
 
 		ModelMatrix.main = new ModelMatrix();
 		ModelMatrix.main.loadIdentityMatrix();
@@ -68,9 +69,12 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		//orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
 		
 		Gdx.input.setCursorCatched(true);
-		//sound = Gdx.audio.newSound(Gdx.files.internal("hall.mp3"));
+		sound = Gdx.audio.newSound(Gdx.files.internal("ShotgunBoom.mp3"));
+		clayBreak = Gdx.audio.newSound(Gdx.files.internal("ClayBreaking.mp3"));
+		clayBreak.setVolume(1, 0.2f);
 		//winSong = Gdx.audio.newSound(Gdx.files.internal("celebrate.mp3"));
 		//track = sound.play(1);
+		
 		
 	}
 	
@@ -161,6 +165,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			projectile.setPitch(upAngle);
 			projectile.setRotation(leftAngle);
 			projectiles.add(projectile);
+			sound.play(1);
 		}
 		if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
 			Projectile projectile = new Projectile();
@@ -171,13 +176,22 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			projectile.setRotation(-45);
 			projectile.setPigeon(true);
 			projectiles.add(projectile);
+			Projectile projectile2 = new Projectile();
+			projectile2.setX(10);
+			projectile2.setY(0);
+			projectile2.setZ(0);
+			projectile2.setPitch(55);
+			projectile2.setRotation(45);
+			projectile2.setPigeon(true);
+			projectiles.add(projectile2);
+			
 		}
 	}
 	
 	private void display()
 	{
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 0.3f, 0.1f, 1.0f);
+		Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
 		for(int viewNum = 0; viewNum < 1; viewNum++)
 		{
 			if(viewNum == 0)
@@ -201,15 +215,24 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		
 			ModelMatrix.main.loadIdentityMatrix();
 			
-			
+			/* Reticle */
 			ModelMatrix.main.pushMatrix();
 			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
 			ModelMatrix.main.addRotationY(leftAngle);
 			ModelMatrix.main.addRotationX(upAngle);
 			ModelMatrix.main.addTranslation(0, 0, -0.3f);
 			ModelMatrix.main.addScale(0.005f, 0.005f, 0.1f);
+			shader.setModelMatrix(ModelMatrix.main.getMatrix());
+			SphereGraphic.drawOutlineSphere();
+			ModelMatrix.main.popMatrix();
 			
-			
+			/* Barrel */
+			ModelMatrix.main.pushMatrix();
+			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
+			ModelMatrix.main.addRotationY(leftAngle);
+			ModelMatrix.main.addRotationX(upAngle);
+			ModelMatrix.main.addTranslation(0.05f, -0.2f, 0);
+			ModelMatrix.main.addScale(0.05f, 0.05f, 3);
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			SphereGraphic.drawOutlineSphere();
 			ModelMatrix.main.popMatrix();
@@ -226,6 +249,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 							projectiles.get(i).setHit(true);
 							projectiles.get(j).setHit(true);
 							System.out.println("HIT!");
+							clayBreak.play(1);
 							break;
 						}
 					}
@@ -244,28 +268,29 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			
 			
 			//Light 1
-			shader.setLightPosition(4 * s + 10.0f, 7.0f,4 * c -10.0f, 1.0f);
-			shader.setLightColor(1.0f, 0.3f, 0.3f, 1.0f);
+			shader.setLightPosition(4 + 10.0f, 7.0f,4 -10.0f, 1.0f);
+			shader.setLightColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 			//Light 2
-			shader.setLightPosition2(4 * s + 4.0f, 7.0f, 4 * c - 6.0f, 1.0f);
-			shader.setLightColor2(0.3f, 1.0f, 0.3f, 1.0f);
+			shader.setLightPosition2(4 + 4.0f, 7.0f, 4 - 6.0f, 1.0f);
+			shader.setLightColor2(1.0f, 1.0f, 1.0f, 1.0f);
 
 
 			//Light 3
-			shader.setLightPosition3(4 * s + 8.0f, 7.0f, 4 * c -1.0f, 1.0f);
-			shader.setLightColor3(0.3f, 0.3f, 1.0f, 1.0f);
+			shader.setLightPosition3(4 + 8.0f, 7.0f, 4 -1.0f, 1.0f);
+			shader.setLightColor3(1.0f, 1.0f, 1.0f, 1.0f);
 
 			//Directional light
-			shader.setLightColor4(0.2f, 0.2f, 0.2f, 1.0f);
+			shader.setLightColor4(0.9f, 0.9f, 0.9f, 1.0f);
 			
 
 			
-			shader.setGlobalAmbient(0.2f, 0.2f, 0.2f, 1);
+			shader.setGlobalAmbient(0.0f, 1.0f, 0.0f, 1);
 			shader.setMaterialEmission(1.0f, 1.0f, 1.0f, 1.0f);
-			shader.setMaterialDiffuse(0, 0, 0, 1);
-			shader.setMaterialSpecular(0, 0, 0, 1);
+			shader.setMaterialDiffuse(0.3f, 0.4f, 0, 1);
+			shader.setMaterialSpecular(0, 0.9f, 0, 1);
 			
+			/*
 			//Lightbulp 1
 			ModelMatrix.main.pushMatrix();
 			ModelMatrix.main.addTranslation(4 * s + 10.0f, 7.0f,4 * c -10.0f);
@@ -289,17 +314,13 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();
-			
+			*/
 			shader.setMaterialDiffuse(0.3f, 0.3f, 0.7f, 1.0f);
 			shader.setMaterialSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 			shader.setMaterialEmission(0, 0, 0, 1);
-			shader.setShininess(30.0f);
+			shader.setShininess(10.0f);
 			
-			ModelMatrix.main.pushMatrix();
-			ModelMatrix.main.addTranslation(8.0f, 10.0f, -8.0f);
-			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			SphereGraphic.drawSolidSphere();
-			ModelMatrix.main.popMatrix();
+			
 			
 			
 

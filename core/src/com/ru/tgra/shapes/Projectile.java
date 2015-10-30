@@ -2,6 +2,7 @@ package com.ru.tgra.shapes;
 
 import java.util.Random;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 
 public class Projectile {
@@ -135,19 +136,24 @@ public class Projectile {
 			move -=0.1f;
 			
 			if(pigeon && !hit){
-				
+				shader.setGlobalAmbient(1, 0.647f, 0, 1);
+				Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 0.647f, 0.0f, 1.0f);
 				pitch -= 0.18f;
 				ModelMatrix.main.addScale(1, 0.15f, 1);
 				shader.setModelMatrix(ModelMatrix.main.getMatrix());
 				SphereGraphic.drawSolidSphere();
+				
 			}
 			else if(!pigeon){
+				
+				ModelMatrix.main.pushMatrix();
+				ModelMatrix.main.addTranslation(0, 0, -4f);
 				move -=0.45f;
 				boolean negative;
 				boolean negative2;
 				int sign = 1;
 				int sign2 = 1;
-				for(int i = 0; i < 8; i++){
+				for(int i = 0; i < 12; i++){
 					ModelMatrix.main.pushMatrix();
 					negative = r.nextBoolean();
 					negative2 = r.nextBoolean();
@@ -163,12 +169,14 @@ public class Projectile {
 					else{
 						sign2 = 1;
 					}
-					ModelMatrix.main.addTranslation(sign * r.nextFloat(), sign2 * r.nextFloat(), sign * r.nextFloat());
-					ModelMatrix.main.addScale(0.1f, 0.1f, 0.1f);
+					ModelMatrix.main.addTranslation(sign * r.nextFloat()/2, sign2 * r.nextFloat()/2, 0);
+					ModelMatrix.main.addScale(0.05f, 0.05f, 0.05f);
 					shader.setModelMatrix(ModelMatrix.main.getMatrix());
 					SphereGraphic.drawSolidSphere();
 					ModelMatrix.main.popMatrix();
 				}
+				ModelMatrix.main.popMatrix();
+				Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 0.8f, 0.3f, 0.5f, 1.0f);
 				
 				
 			}
