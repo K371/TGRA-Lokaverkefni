@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 
 public class LabFirst3DGame extends ApplicationAdapter {
@@ -80,7 +81,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		sound = Gdx.audio.newSound(Gdx.files.internal("ShotgunBoom.mp3"));
 		clayBreak = Gdx.audio.newSound(Gdx.files.internal("ClayBreaking.mp3"));
 		thrower = Gdx.audio.newSound(Gdx.files.internal("Thrower.mp3"));
-		clayBreak.setVolume(1, 0.2f);
+		
 		//winSong = Gdx.audio.newSound(Gdx.files.internal("celebrate.mp3"));
 		//track = sound.play(1);
 		
@@ -147,7 +148,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			}
 		}
 		*/
-		
+		/*
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			cam.rotateY(90.0f * deltaTime);
 		}
@@ -160,6 +161,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 			cam.pitch(-90.0f * deltaTime);
 		}
+		*/
 		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !justPressed) {
 			justPressed = true;
 			Projectile projectile = new Projectile();
@@ -258,20 +260,25 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			ModelMatrix.main.addTranslation(0, 0, -0.3f);
 			ModelMatrix.main.addScale(0.005f, 0.005f, 0.1f);
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			SphereGraphic.drawOutlineSphere();
+			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();
 			
+			Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 0.0f, 0.0f, 0.0f, 1.0f);
 			/* Barrel */
 			ModelMatrix.main.pushMatrix();
 			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
 			ModelMatrix.main.addRotationY(leftAngle);
 			ModelMatrix.main.addRotationX(upAngle);
-			ModelMatrix.main.addTranslation(0.05f, -0.2f, 0);
-			ModelMatrix.main.addScale(0.05f, 0.05f, 3);
+			ModelMatrix.main.addTranslation(0.05f, -0.2f, 0f);
+			ModelMatrix.main.addScale(0.02f, 0.02f, 1);
+			
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			SphereGraphic.drawOutlineSphere();
+			BoxGraphic.drawSolidCube();
+			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();
 			
+			
+			Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
 			
 			for(Projectile p : projectiles){
 				p.drawProjectile(shader);
@@ -284,7 +291,21 @@ public class LabFirst3DGame extends ApplicationAdapter {
 							projectiles.get(i).setHit(true);
 							projectiles.get(j).setHit(true);
 							System.out.println("HIT!");
-							clayBreak.play(1);
+							Vector3 eyeVec = new Vector3();
+							eyeVec.x = cam.eye.x;
+							eyeVec.y = cam.eye.y;
+							eyeVec.z = cam.eye.z;
+							double distToPlayer = projectiles.get(i).distance(eyeVec);
+							float volume = (float) ((float) 4/distToPlayer);
+							System.out.println(volume);
+							if(volume > 1){
+								volume = 1;
+							}
+							if(volume < 0){
+								volume = 0;
+							}
+							long play = clayBreak.play(1);
+							clayBreak.setVolume(play, volume);
 							break;
 						}
 					}
