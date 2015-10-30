@@ -148,7 +148,7 @@ public class Projectile {
 				
 				ModelMatrix.main.pushMatrix();
 				ModelMatrix.main.addTranslation(0, 0, -4f);
-				move -=0.45f;
+				move -=0.75f;
 				boolean negative;
 				boolean negative2;
 				int sign = 1;

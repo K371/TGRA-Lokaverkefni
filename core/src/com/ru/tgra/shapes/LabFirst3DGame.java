@@ -1,5 +1,7 @@
 package com.ru.tgra.shapes;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -29,6 +31,9 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	
 	private Maze maze;
 	
+	private boolean justPressed;
+	private boolean oldJustPressed;
+	
 	private Sound sound;
 	private Sound clayBreak;
 	private Sound thrower;
@@ -41,6 +46,9 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	@Override
 	public void create () 
 	{
+		
+		justPressed = false;
+		oldJustPressed = false;
 		projectiles = new ArrayList<Projectile>();
 		leftAngle = 315;
 		upAngle = 0;
@@ -49,7 +57,6 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		
 		shader = new Shader();
 		maze = new Maze(15, 15);
-		
 
 		BoxGraphic.create(shader.getVertexPointer(), shader.getNormalPointer());
 		SphereGraphic.create(shader.getVertexPointer(), shader.getNormalPointer());
@@ -153,7 +160,24 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 			cam.pitch(-90.0f * deltaTime);
 		}
+		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !justPressed) {
+			justPressed = true;
+			Projectile projectile = new Projectile();
+			projectile.setX(cam.eye.x);
+			projectile.setY(cam.eye.y);
+			projectile.setZ(cam.eye.z);
+			projectile.setPitch(upAngle);
+			projectile.setRotation(leftAngle);
+			projectiles.add(projectile);
+			sound.play(1);
+		}
+		else if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
+			
+			justPressed = false;
+		}
 		
+		
+				
 		
 		if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
 			Gdx.graphics.setDisplayMode(500, 500, false);
@@ -179,16 +203,6 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		cam.pitch(changeY);	
 		
 		if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-			Projectile projectile = new Projectile();
-			projectile.setX(cam.eye.x);
-			projectile.setY(cam.eye.y);
-			projectile.setZ(cam.eye.z);
-			projectile.setPitch(upAngle);
-			projectile.setRotation(leftAngle);
-			projectiles.add(projectile);
-			sound.play(1);
-		}
-		if(Gdx.input.isKeyJustPressed(Input.Keys.P)){
 			Projectile projectile = new Projectile();
 			projectile.setX(0);
 			projectile.setY(0);
@@ -266,7 +280,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			for(int i = 0; i < projectiles.size(); i++){
 				for(int j = 0; j < projectiles.size(); j++){
 					if(i!=j && !projectiles.get(i).getPigeon()){
-						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.3f){
+						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.5f){
 							projectiles.get(i).setHit(true);
 							projectiles.get(j).setHit(true);
 							System.out.println("HIT!");
@@ -415,4 +429,8 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		ModelMatrix.main.popMatrix();
 		ModelMatrix.main.popMatrix();
 	}
+
+
+	
+	
 }
