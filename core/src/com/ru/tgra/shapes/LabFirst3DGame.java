@@ -31,6 +31,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	
 	private Sound sound;
 	private Sound clayBreak;
+	private Sound thrower;
 	//private Sound winSong;
 	//private boolean win;
 	//private long winTrack;
@@ -41,7 +42,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	public void create () 
 	{
 		projectiles = new ArrayList<Projectile>();
-		leftAngle = -45;
+		leftAngle = 315;
 		upAngle = 0;
 		//win = true;
 		//volume = 1;
@@ -71,15 +72,18 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		Gdx.input.setCursorCatched(true);
 		sound = Gdx.audio.newSound(Gdx.files.internal("ShotgunBoom.mp3"));
 		clayBreak = Gdx.audio.newSound(Gdx.files.internal("ClayBreaking.mp3"));
+		thrower = Gdx.audio.newSound(Gdx.files.internal("Thrower.mp3"));
 		clayBreak.setVolume(1, 0.2f);
 		//winSong = Gdx.audio.newSound(Gdx.files.internal("celebrate.mp3"));
 		//track = sound.play(1);
+		
 		
 		
 	}
 	
 	private void update()
 	{
+		leftAngle %= 360;
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		
 		/* If we have reached the area where the z coord is less than -13 then we have reached 
@@ -91,6 +95,19 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			winTrack = winSong.play(1);
 		}
 		*/
+		float soundAngle = leftAngle;
+		soundAngle %= 360;
+		float pan;
+		if(soundAngle < 180 && soundAngle > 0){
+			pan = soundAngle / 180;
+			pan = 1-pan;
+			
+			//System.out.println(pan);
+		}
+		else{
+			
+		}
+		
 		
 		angle += 180.0f * deltaTime;
 		
@@ -145,11 +162,15 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			}else{
 				sound.dispose();
 			}*/
+			sound.dispose();
+			clayBreak.dispose();
+			thrower.dispose();
 			Gdx.app.exit();
 		}
 		float changeX = -0.2f * Gdx.input.getDeltaX();
 		float changeY = -0.2f * Gdx.input.getDeltaY();
 		leftAngle += changeX;
+		
 		if(upAngle + changeY <= 70 && upAngle + changeY >= -85){
 			upAngle += changeY;
 		}
