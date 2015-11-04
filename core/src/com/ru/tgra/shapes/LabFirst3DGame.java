@@ -165,14 +165,19 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
 			cam.walkForward(-3.0f * deltaTime);
 		}
-		
-		if(Gdx.input.isKeyPressed(Input.Keys.R) && System.currentTimeMillis() - reloadTime > 3000) {
-			reloadTime = System.currentTimeMillis();
+		long currTime = System.currentTimeMillis();
+		if(currTime - reloadTime > 3000 && ammo == 0){
 			ammo = 2;
+		}
+		
+		
+		if(Gdx.input.isKeyPressed(Input.Keys.R) && currTime - reloadTime > 3000) {
+			reloadTime = System.currentTimeMillis();
 			reload.play(1);
+			ammo = 0;
 		}
 	
-		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !justPressed && System.currentTimeMillis() - reloadTime > 3000) {
+		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !justPressed && currTime - reloadTime > 3000) {
 				ammo--;
 				justPressed = true;
 				Projectile projectile = new Projectile();
@@ -184,8 +189,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 				projectiles.add(projectile);
 				sound.play(1);
 				if(ammo == 0){
-					reloadTime = System.currentTimeMillis();
-					ammo = 2;
+					reloadTime = currTime;
 					reload.play(1);
 				}
 		}
@@ -294,7 +298,8 @@ public class LabFirst3DGame extends ApplicationAdapter {
 				ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
 				ModelMatrix.main.addRotationY(leftAngle);
 				ModelMatrix.main.addRotationX(upAngle);
-				ModelMatrix.main.addTranslation(0.05f, -0.14f, 0f);
+				ModelMatrix.main.addTranslation(0.05f, -0.12f, 0.15f);
+				ModelMatrix.main.addRotationY(180);
 				
 				ModelMatrix.main.addScale(0.15f, 0.15f, 0.3f);
 				shader.setModelMatrix(ModelMatrix.main.getMatrix());
@@ -312,12 +317,16 @@ public class LabFirst3DGame extends ApplicationAdapter {
 				ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
 				ModelMatrix.main.addRotationY(leftAngle);
 				ModelMatrix.main.addRotationX(upAngle);
-				if(System.currentTimeMillis() - reloadTime < 2000){
+				if(System.currentTimeMillis() - reloadTime < 1000){
+					
+				}
+				else if(System.currentTimeMillis() - reloadTime < 2000){
 					ModelMatrix.main.addRotationX(reloadAngle--);
 				}else{
 					ModelMatrix.main.addRotationX(reloadAngle++);
 				}
-				ModelMatrix.main.addTranslation(0.05f, -0.14f, 0f);
+				ModelMatrix.main.addTranslation(0.05f, -0.12f, 0.15f);
+				ModelMatrix.main.addRotationY(180);
 				
 				ModelMatrix.main.addScale(0.15f, 0.15f, 0.3f);
 				shader.setModelMatrix(ModelMatrix.main.getMatrix());
@@ -329,8 +338,24 @@ public class LabFirst3DGame extends ApplicationAdapter {
 				ModelMatrix.main.popMatrix();
 			}
 			
+			/* Ammo */
+			ModelMatrix.main.pushMatrix();
+			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
+			ModelMatrix.main.addRotationY(leftAngle);
+			ModelMatrix.main.addRotationX(upAngle);
+			ModelMatrix.main.addTranslation(-0.2f, -0.25f, -0.2f);
+			//ModelMatrix.main.addTranslation(0.1f, 0.1f, -0.5f);
 			
-			
+			for(int i = 0; i < ammo; i++){
+				ModelMatrix.main.pushMatrix();
+				ModelMatrix.main.addScale(0.005f, 0.25f, 0.005f);
+				ModelMatrix.main.addRotationX(90);
+				shader.setModelMatrix(ModelMatrix.main.getMatrix());
+				model.draw(shader);
+				ModelMatrix.main.popMatrix();
+				ModelMatrix.main.addTranslation(0.02f, 0, 0);
+			}
+			ModelMatrix.main.popMatrix();
 			Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
 			
 			
@@ -383,16 +408,16 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			
 			
 			//Light 1
-			shader.setLightPosition(4 + 10.0f, 7.0f,4 -10.0f, 1.0f);
+			shader.setLightPosition(4 + 10.0f, 7.0f, 10.0f, 1.0f);
 			shader.setLightColor(0.9f, 1.0f, 0.4f, 1.0f);
 
 			//Light 2
-			shader.setLightPosition2(4 + 4.0f, 7.0f, 4 - 6.0f, 1.0f);
+			shader.setLightPosition2(0.0f, 7.0f, 6.0f, 1.0f);
 			shader.setLightColor2(0.9f, 1.0f, 0.4f, 1.0f);
 
 
 			//Light 3
-			shader.setLightPosition3(4 + 8.0f, 7.0f, 4 -1.0f, 1.0f);
+			shader.setLightPosition3(8.0f, 7.0f, 4 -1.0f, 1.0f);
 			shader.setLightColor3(0.9f, 1.0f, 0.4f, 1.0f);
 
 			//Directional light
