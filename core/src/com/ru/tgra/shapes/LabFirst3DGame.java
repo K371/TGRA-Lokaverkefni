@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
@@ -80,6 +81,8 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		//win = true;
 		//volume = 1;
 		
+		DisplayMode disp = Gdx.graphics.getDesktopDisplayMode();
+		Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
 		shader = new Shader();
 		maze = new Maze(15, 15);
 
