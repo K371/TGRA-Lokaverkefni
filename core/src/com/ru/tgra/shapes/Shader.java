@@ -13,6 +13,7 @@ public class Shader {
 
 		private int positionLoc;
 		private int normalLoc;
+		private int uvLoc;
 
 		private int modelMatrixLoc;
 		private int viewMatrixLoc;
@@ -68,6 +69,9 @@ public class Shader {
 
 		normalLoc				= Gdx.gl.glGetAttribLocation(renderingProgramID, "a_normal");
 		Gdx.gl.glEnableVertexAttribArray(normalLoc);
+		
+		uvLoc				= Gdx.gl.glGetAttribLocation(renderingProgramID, "a_uv");
+		Gdx.gl.glEnableVertexAttribArray(uvLoc);
 
 		modelMatrixLoc			= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_modelMatrix");
 		viewMatrixLoc			= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_viewMatrix");
@@ -174,6 +178,11 @@ public class Shader {
 	public int getNormalPointer() {
 		
 		return normalLoc;
+	}
+	
+	public int getUVPointer()
+	{
+		return uvLoc;
 	}
 
 	public void setModelMatrix(FloatBuffer matrix) {

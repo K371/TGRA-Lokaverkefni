@@ -3,14 +3,21 @@ package com.ru.tgra.shapes;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.utils.JsonReader;
+import com.ru.tgra.shapes.g3djmodel.G3DJModelLoader;
+import com.ru.tgra.shapes.g3djmodel.MeshModel;
 
 public class LabFirst3DGame extends ApplicationAdapter {
 
@@ -21,6 +28,7 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	private float upAngle;
 	private float objectRotationAngle;
 	private float objectPitchAngle;
+	private float reloadAngle;
 
 	public static int colorLoc;
 	
@@ -38,15 +46,31 @@ public class LabFirst3DGame extends ApplicationAdapter {
 	private Sound sound;
 	private Sound clayBreak;
 	private Sound thrower;
+	private Sound reload;
+	Random r;
 	//private Sound winSong;
 	//private boolean win;
 	//private long winTrack;
 	//private long track;
 	//private float volume;
+	
+	MeshModel model, shotgun;
+	private int ammo;
+	long reloadTime;
+	
+	ArrayList<Cloud> clouds;
+	
 
 	@Override
 	public void create () 
 	{
+		reloadAngle = 0;
+		reloadTime = System.currentTimeMillis();
+		ammo = 2;
+		clouds = new ArrayList<Cloud>();
+		r = new Random();
+		model = G3DJModelLoader.loadG3DJFromFile("untitled2.g3dj");
+		shotgun = G3DJModelLoader.loadG3DJFromFile("baerrel.g3dj");
 		
 		justPressed = false;
 		oldJustPressed = false;
@@ -81,11 +105,16 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		sound = Gdx.audio.newSound(Gdx.files.internal("ShotgunBoom.mp3"));
 		clayBreak = Gdx.audio.newSound(Gdx.files.internal("ClayBreaking.mp3"));
 		thrower = Gdx.audio.newSound(Gdx.files.internal("Thrower.mp3"));
+		reload = Gdx.audio.newSound(Gdx.files.internal("reload2.mp3"));
 		
 		//winSong = Gdx.audio.newSound(Gdx.files.internal("celebrate.mp3"));
 		//track = sound.play(1);
-		
-		
+	
+				
+		/*for(int i = 0; i < 200; i++){
+			Cloud cloud = new Cloud(r.nextInt(200)-100, 60, r.nextInt(200) - 100);
+			clouds.add(cloud);
+		}*/
 		
 	}
 	
@@ -128,50 +157,34 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		if(Gdx.input.isKeyPressed(Input.Keys.W)) {
 			cam.walkForward(3.0f * deltaTime);
 		}
+		
+
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
 			cam.walkForward(-3.0f * deltaTime);
 		}
 		
-		/* Mute functionality */
-		/*if(Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-			if(volume == 1){
-				volume = 0;
-			}
-			else{
-				volume = 1;
-			}
-			if(win){
-				sound.setVolume(track, volume);
-			}
-			else{
-				winSong.setVolume(winTrack, volume);
-			}
+		if(Gdx.input.isKeyPressed(Input.Keys.R) && System.currentTimeMillis() - reloadTime > 3000) {
+			reloadTime = System.currentTimeMillis();
+			ammo = 2;
+			reload.play(1);
 		}
-		*/
-		/*
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			cam.rotateY(90.0f * deltaTime);
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			cam.rotateY(-90.0f * deltaTime);
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			cam.pitch(90.0f * deltaTime);
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			cam.pitch(-90.0f * deltaTime);
-		}
-		*/
-		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !justPressed) {
-			justPressed = true;
-			Projectile projectile = new Projectile();
-			projectile.setX(cam.eye.x);
-			projectile.setY(cam.eye.y);
-			projectile.setZ(cam.eye.z);
-			projectile.setPitch(upAngle);
-			projectile.setRotation(leftAngle);
-			projectiles.add(projectile);
-			sound.play(1);
+	
+		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !justPressed && System.currentTimeMillis() - reloadTime > 3000) {
+				ammo--;
+				justPressed = true;
+				Projectile projectile = new Projectile();
+				projectile.setX(cam.eye.x);
+				projectile.setY(cam.eye.y);
+				projectile.setZ(cam.eye.z);
+				projectile.setPitch(upAngle);
+				projectile.setRotation(leftAngle);
+				projectiles.add(projectile);
+				sound.play(1);
+				if(ammo == 0){
+					reloadTime = System.currentTimeMillis();
+					ammo = 2;
+					reload.play(1);
+				}
 		}
 		else if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
 			
@@ -209,16 +222,16 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			projectile.setX(0);
 			projectile.setY(0);
 			projectile.setZ(0);
-			projectile.setPitch(45);
-			projectile.setRotation(-45);
+			projectile.setPitch(40+r.nextFloat()*10);
+			projectile.setRotation(-40+r.nextFloat()*10);
 			projectile.setPigeon(true);
 			projectiles.add(projectile);
 			Projectile projectile2 = new Projectile();
 			projectile2.setX(10);
 			projectile2.setY(0);
 			projectile2.setZ(0);
-			projectile2.setPitch(55);
-			projectile2.setRotation(45);
+			projectile2.setPitch(45 + r.nextFloat()*10);
+			projectile2.setRotation(50-r.nextFloat()*10);
 			projectile2.setPigeon(true);
 			projectiles.add(projectile2);
 			
@@ -252,6 +265,9 @@ public class LabFirst3DGame extends ApplicationAdapter {
 		
 			ModelMatrix.main.loadIdentityMatrix();
 			
+			
+			
+			
 			/* Reticle */
 			ModelMatrix.main.pushMatrix();
 			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
@@ -262,42 +278,79 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();
+
 			
-			Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 0.0f, 0.0f, 0.0f, 1.0f);
-			/* Barrel */
-			ModelMatrix.main.pushMatrix();
-			ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
-			ModelMatrix.main.addRotationY(leftAngle);
-			ModelMatrix.main.addRotationX(upAngle);
-			ModelMatrix.main.addTranslation(0.05f, -0.2f, 0f);
-			ModelMatrix.main.addScale(0.02f, 0.02f, 1);
+			shader.setMaterialDiffuse(0.1f, 0.1f, 0.1f, 1.0f);
+			shader.setMaterialSpecular(0.2f, 0.2f, 0.2f, 1.0f);
+			shader.setMaterialEmission(0.0f, 0.0f, 0.0f, 1.0f);
 			
-			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			BoxGraphic.drawSolidCube();
-			SphereGraphic.drawSolidSphere();
-			ModelMatrix.main.popMatrix();
+			
+			if(System.currentTimeMillis() - reloadTime > 3000){
+				/* Barrel */
+				ModelMatrix.main.pushMatrix();
+				ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
+				ModelMatrix.main.addRotationY(leftAngle);
+				ModelMatrix.main.addRotationX(upAngle);
+				ModelMatrix.main.addTranslation(0.05f, -0.14f, 0f);
+				
+				ModelMatrix.main.addScale(0.15f, 0.15f, 0.3f);
+				shader.setModelMatrix(ModelMatrix.main.getMatrix());
+				shotgun.draw(shader);
+				ModelMatrix.main.addTranslation(0.0f, -0.2f, 0f);
+				shader.setModelMatrix(ModelMatrix.main.getMatrix());
+				shotgun.draw(shader);
+				
+				ModelMatrix.main.popMatrix();
+				reloadAngle = 0;
+			}
+			else{
+				/* Barrel */
+				ModelMatrix.main.pushMatrix();
+				ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
+				ModelMatrix.main.addRotationY(leftAngle);
+				ModelMatrix.main.addRotationX(upAngle);
+				if(System.currentTimeMillis() - reloadTime < 2000){
+					ModelMatrix.main.addRotationX(reloadAngle--);
+				}else{
+					ModelMatrix.main.addRotationX(reloadAngle++);
+				}
+				ModelMatrix.main.addTranslation(0.05f, -0.14f, 0f);
+				
+				ModelMatrix.main.addScale(0.15f, 0.15f, 0.3f);
+				shader.setModelMatrix(ModelMatrix.main.getMatrix());
+				shotgun.draw(shader);
+				ModelMatrix.main.addTranslation(0.0f, -0.2f, 0f);
+				shader.setModelMatrix(ModelMatrix.main.getMatrix());
+				shotgun.draw(shader);
+				
+				ModelMatrix.main.popMatrix();
+			}
+			
 			
 			
 			Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 1.0f, 1.0f, 1.0f);
 			
+			
+			
+			
+			
+			
 			for(Projectile p : projectiles){
-				p.drawProjectile(shader);
+				p.drawProjectile(shader, model);
 			}
 			
 			for(int i = 0; i < projectiles.size(); i++){
 				for(int j = 0; j < projectiles.size(); j++){
 					if(i!=j && !projectiles.get(i).getPigeon()){
-						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.5f){
+						if(projectiles.get(i).distance(projectiles.get(j).getV()) < 0.4f){
 							projectiles.get(i).setHit(true);
 							projectiles.get(j).setHit(true);
-							System.out.println("HIT!");
 							Vector3 eyeVec = new Vector3();
 							eyeVec.x = cam.eye.x;
 							eyeVec.y = cam.eye.y;
 							eyeVec.z = cam.eye.z;
 							double distToPlayer = projectiles.get(i).distance(eyeVec);
 							float volume = (float) ((float) 4/distToPlayer);
-							System.out.println(volume);
 							if(volume > 1){
 								volume = 1;
 							}
@@ -312,6 +365,9 @@ public class LabFirst3DGame extends ApplicationAdapter {
 				}
 			}
 		
+			/*for(Cloud cloud : clouds){
+				cloud.drawCloud(shader);
+			}*/
 			
 			for(Projectile p : projectiles){
 				if(p.getAbsoluteY() <= 0 || p.getAbsoluteY() > 30 || p.getAbsoluteZ() < -30 || p.getAbsoluteZ() > 30 || p.getAbsoluteX() < -30 || p.getAbsoluteX() > 30){
@@ -325,27 +381,23 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			
 			//Light 1
 			shader.setLightPosition(4 + 10.0f, 7.0f,4 -10.0f, 1.0f);
-			shader.setLightColor(1.0f, 1.0f, 1.0f, 1.0f);
+			shader.setLightColor(0.9f, 1.0f, 0.4f, 1.0f);
 
 			//Light 2
 			shader.setLightPosition2(4 + 4.0f, 7.0f, 4 - 6.0f, 1.0f);
-			shader.setLightColor2(1.0f, 1.0f, 1.0f, 1.0f);
+			shader.setLightColor2(0.9f, 1.0f, 0.4f, 1.0f);
 
 
 			//Light 3
 			shader.setLightPosition3(4 + 8.0f, 7.0f, 4 -1.0f, 1.0f);
-			shader.setLightColor3(1.0f, 1.0f, 1.0f, 1.0f);
+			shader.setLightColor3(0.9f, 1.0f, 0.4f, 1.0f);
 
 			//Directional light
-			shader.setLightColor4(0.9f, 0.9f, 0.9f, 1.0f);
+			shader.setLightColor4(0.9f, 1.0f, 0.4f, 1.0f);
 			
 
 			
-			shader.setGlobalAmbient(0.0f, 1.0f, 0.0f, 1);
-			shader.setMaterialEmission(1.0f, 1.0f, 1.0f, 1.0f);
-			shader.setMaterialDiffuse(0.3f, 0.4f, 0, 1);
-			shader.setMaterialSpecular(0, 0.9f, 0, 1);
-			
+	
 			/*
 			//Lightbulp 1
 			ModelMatrix.main.pushMatrix();
@@ -371,7 +423,8 @@ public class LabFirst3DGame extends ApplicationAdapter {
 			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();
 			*/
-			shader.setMaterialDiffuse(0.3f, 0.3f, 0.7f, 1.0f);
+			shader.setGlobalAmbient(0.2f, 0.2f, 0.0f, 1);
+			shader.setMaterialDiffuse(0.3f, 0.3f, 0.3f, 1.0f);
 			shader.setMaterialSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 			shader.setMaterialEmission(0, 0, 0, 1);
 			shader.setShininess(10.0f);

@@ -5,6 +5,7 @@ precision mediump float;
 
 attribute vec3 a_position;
 attribute vec3 a_normal;
+attribute vec3 a_uv;
 
 uniform mat4 u_modelMatrix;
 uniform mat4 u_viewMatrix;
@@ -31,6 +32,7 @@ uniform vec4 u_materialEmission;
 
 varying vec4 v_normal;
 varying vec4 v_color;
+varying vec4 v_uv;
 
 void main()
 {
@@ -77,6 +79,7 @@ void main()
 	specularColor = pow(phong, u_materialShininess) * u_lightColor2 * u_materialSpecular;
 	
 	vec4 lightCalcColor2 = diffuseColor + specularColor; 
+	
 	
 	//end light 2
 	

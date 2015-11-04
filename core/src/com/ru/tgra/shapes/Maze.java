@@ -1,5 +1,6 @@
 package com.ru.tgra.shapes;
 
+import com.badlogic.gdx.Gdx;
 
 public class Maze {
 	public static Cell[][] cells;
@@ -34,6 +35,26 @@ public class Maze {
 			}
 		}
 		
+		cells[2][2].northWall = true;
+		cells[2][2].eastWall = true;
+		cells[1][2].eastWall = true;
+		
+		cells[4][2].northWall = true;
+		cells[4][2].eastWall = true;
+		cells[3][2].eastWall = true;
+		
+		cells[6][2].northWall = true;
+		cells[6][2].eastWall = true;
+		cells[5][2].eastWall = true;
+		
+		cells[8][2].northWall = true;
+		cells[8][2].eastWall = true;
+		cells[7][2].eastWall = true;
+		
+		cells[10][2].northWall = true;
+		cells[10][2].eastWall = true;
+		cells[9][2].eastWall = true;
+		
 
 	}
 	
@@ -41,16 +62,18 @@ public class Maze {
 		ModelMatrix.main.pushMatrix();
 		
 		//floor
+		
+		shader.setMaterialDiffuse(0.2f, 0.75f, 0.2f, 1.0f);
 		ModelMatrix.main.pushMatrix();
 		ModelMatrix.main.addTranslation(0, -50f, 0);
 		ModelMatrix.main.addScale(50, 100f, 50f);
-		
-		
-		//ModelMatrix.main.setShaderMatrix();
 		shader.setModelMatrix(ModelMatrix.main.getMatrix());
 		BoxGraphic.drawSolidCube();
 		ModelMatrix.main.popMatrix();
 		
+		shader.setMaterialDiffuse(0.2f, 0.2f, 0.2f, 1.0f);
+		shader.setMaterialSpecular(0.1f, 0.4f, 0.0f, 1.0f);
+		shader.setMaterialEmission(0.3f, 0.3f, 0.3f, 1.0f);
 		ModelMatrix.main.addTranslation(0,1,0);
 		for(int i = 0; i < width; i++){
 			ModelMatrix.main.pushMatrix();

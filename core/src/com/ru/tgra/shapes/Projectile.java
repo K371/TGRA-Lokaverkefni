@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
+import com.ru.tgra.shapes.g3djmodel.MeshModel;
 
 public class Projectile {
 	private float pitch;
@@ -117,7 +118,7 @@ public class Projectile {
 		return Math.sqrt(v.dst2(v2));
 	}
 	
-	public void drawProjectile(Shader shader){
+	public void drawProjectile(Shader shader, MeshModel model){
 		ModelMatrix.main.pushMatrix();
 			ModelMatrix.main.addTranslation(x, y, z);
 			ModelMatrix.main.addRotationY(rotation);
@@ -136,16 +137,25 @@ public class Projectile {
 			move -=0.1f;
 			
 			if(pigeon && !hit){
-				shader.setGlobalAmbient(1, 0.647f, 0, 1);
+				ModelMatrix.main.addScale(1f, 3f, 1f);
+				ModelMatrix.main.addRotationX(90);
+				shader.setMaterialDiffuse(1.0f, 0.657f, 0.0f, 1.0f);
+				
+				shader.setMaterialEmission(1.0f, 0.657f, 0.0f, 1.0f);
+				shader.setMaterialSpecular(1.0f, 0.657f, 0.0f, 1.0f);
+							
 				Gdx.gl.glUniform4f(LabFirst3DGame.colorLoc, 1.0f, 0.647f, 0.0f, 1.0f);
 				pitch -= 0.18f;
-				ModelMatrix.main.addScale(1, 0.15f, 1);
+				
 				shader.setModelMatrix(ModelMatrix.main.getMatrix());
-				SphereGraphic.drawSolidSphere();
+				model.draw(shader);
+				shader.setMaterialDiffuse(0.2f, 0.2f, 0.2f, 1.0f);
 				
 			}
 			else if(!pigeon){
-				
+				shader.setMaterialDiffuse(0.0f, 0f, 0.0f, 1.0f);
+				shader.setMaterialEmission(0.0f, 0.0f, 0.0f, 1.0f);
+				shader.setMaterialSpecular(0.0f, 0.0f, 0.0f, 1.0f);
 				ModelMatrix.main.pushMatrix();
 				ModelMatrix.main.addTranslation(0, 0, -4f);
 				move -=0.75f;
